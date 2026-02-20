@@ -242,7 +242,7 @@ def discover_fast_market_markets(asset="BTC", window="5m"):
     patterns = ASSET_PATTERNS.get(asset, ASSET_PATTERNS["BTC"])
     url = (
         "https://gamma-api.polymarket.com/markets"
-        "?limit=20&closed=false&tag=crypto&order=createdAt&ascending=false"
+        "?limit=200&closed=false&tag=crypto&order=createdAt&ascending=false"
     )
     result = _api_request(url)
     if not result or (isinstance(result, dict) and result.get("error")):
@@ -253,13 +253,7 @@ def discover_fast_market_markets(asset="BTC", window="5m"):
         q = (m.get("question") or "").lower()
         slug = m.get("slug", "")
         matches_window = f"-{window}-" in slug
-
-        # ✅ Only keep markets from today (UTC)
-        today = datetime.now(timezone.utc)
-        today_str = today.strftime("%B %d").replace(" 0", " ").lower()
-        date_ok = today_str in q
-
-        if any(p in q for p in patterns) and matches_window and date_ok:
+        if any(p in q for p in patterns) and matches_window:
             condition_id = m.get("conditionId", "")
             closed = m.get("closed", False)
             if not closed and slug:
