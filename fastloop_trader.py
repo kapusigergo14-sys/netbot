@@ -802,4 +802,3 @@ if __name__ == "__main__":
         show_config=args.config,
         smart_sizing=args.smart_sizing,
         quiet=args.quiet,
-    )
