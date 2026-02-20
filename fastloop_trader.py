@@ -295,23 +295,14 @@ def _parse_fast_market_end_time(question):
         return None
 
 
-def find_best_fast_market(markets):
-    """Pick the best fast_market to trade: soonest expiring with enough time remaining."""
-    now = datetime.now(timezone.utc)
-    candidates = []
-    for m in markets:
-        end_time = m.get("end_time")
-        if not end_time:
-            continue
-        remaining = (end_time - now).total_seconds()
-        if remaining > MIN_TIME_REMAINING:
-            candidates.append((remaining, m))
 
-    if not candidates:
-        return None
-    # Sort by soonest expiring
-    candidates.sort(key=lambda x: x[0])
-    return candidates[0][1]
+def find_best_fast_market(markets):
+    """
+    Always pick the newest active fast market.
+    Gamma API already returns newest first.
+    """
+    return markets[0] if markets else None
+
 
 
 # =============================================================================
