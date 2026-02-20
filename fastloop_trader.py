@@ -245,7 +245,7 @@ def discover_fast_market_markets(asset="BTC", window="5m"):
         "?limit=20&closed=false&tag=crypto&order=createdAt&ascending=false"
     )
     result = _api_request(url)
-    if not result or isinstance(result, dict) and result.get("error"):
+    if not result or (isinstance(result, dict) and result.get("error")):
         return []
 
     markets = []
@@ -253,15 +253,16 @@ def discover_fast_market_markets(asset="BTC", window="5m"):
         q = (m.get("question") or "").lower()
         slug = m.get("slug", "")
         matches_window = f"-{window}-" in slug
+
         # ✅ Only keep markets from today (UTC)
-    today = datetime.now(timezone.utc)
-    today_str = today.strftime("%B %d").replace(" 0", " ").lower()
-    qdate_ok = today_str in q
-if any(p in q for p in patterns) and matches_window and qdate_ok:
+        today = datetime.now(timezone.utc)
+        today_str = today.strftime("%B %d").replace(" 0", " ").lower()
+        date_ok = today_str in q
+
+        if any(p in q for p in patterns) and matches_window and date_ok:
             condition_id = m.get("conditionId", "")
             closed = m.get("closed", False)
             if not closed and slug:
-                # Parse end time from question (e.g., "5:30AM-5:35AM ET")
                 end_time = _parse_fast_market_end_time(m.get("question", ""))
                 markets.append({
                     "question": m.get("question", ""),
@@ -272,8 +273,8 @@ if any(p in q for p in patterns) and matches_window and qdate_ok:
                     "outcome_prices": m.get("outcomePrices", "[]"),
                     "fee_rate_bps": int(m.get("fee_rate_bps") or m.get("feeRateBps") or 0),
                 })
-    return markets
 
+    return markets
 
 def _parse_fast_market_end_time(question):
     """Parse end time from fast market question.
